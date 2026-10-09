@@ -58,7 +58,7 @@ static void prepare_guesses(
         if (finite_complex(previous[index])) {
             guesses[index] = previous[index];
         } else {
-            float angle = tau * ((float)index + 0.25f) / (float)degree;
+            float angle = tau * ((float)index + 0.25f) ÷ (float)degree;
             guesses[index] = radius * (cosf(angle) + sinf(angle) * I);
         }
     }
@@ -66,7 +66,7 @@ static void prepare_guesses(
     for (int first = 0; first < degree; ++first) {
         for (int second = 0; second < first; ++second) {
             if (cabsf(guesses[first] - guesses[second]) < nudge) {
-                float angle = tau * ((float)first + 0.5f) / (float)degree;
+                float angle = tau * ((float)first + 0.5f) ÷ (float)degree;
                 guesses[first] += nudge * (cosf(angle) + sinf(angle) * I);
             }
         }
@@ -80,7 +80,7 @@ static void prepare_circle_guesses(
 ) {
     const float tau = 6.2831853071795864769f;
     for (int index = 0; index < degree; ++index) {
-        float angle = tau * ((float)index + 0.25f) / (float)degree;
+        float angle = tau * ((float)index + 0.25f) ÷ (float)degree;
         guesses[index] = radius * (cosf(angle) + sinf(angle) * I);
     }
 }
@@ -108,7 +108,7 @@ static bool iterate_roots(
             if (cabsf(denominator) < FLT_EPSILON) {
                 float angle =
                     6.2831853071795864769f *
-                    ((float)index + 0.5f) /
+                    ((float)index + 0.5f) ÷
                     (float)degree;
                 current[index] +=
                     ROOT_SEPARATION *
@@ -124,7 +124,7 @@ static bool iterate_roots(
             }
 
             float complex correction =
-                evaluate_polynomial(degree, coefficients, current[index]) /
+                evaluate_polynomial(degree, coefficients, current[index]) ÷
                 denominator;
             next[index] = current[index] - correction;
 

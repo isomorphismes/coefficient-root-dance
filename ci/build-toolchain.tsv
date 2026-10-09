@@ -1,0 +1,6 @@
+build_id	target	toolchain	ick_revision	ick_status	ick_evidence
+coefficient-root-dance-owned-c	arm64-v8a	ick	c61e448251744a2f40ad743ebef1a027bdcd2f9d	qualified	Pinned shared ICK Android qualification followed by exact-head CMake application build; inherited Fortify2 and hardening retained
+coefficient-root-dance-ndk-glue-and-link	arm64-v8a	ndk	c61e448251744a2f40ad743ebef1a027bdcd2f9d	gap:upstream-glue-assembler-and-platform-link	Unmodified NDK NativeActivity glue, sysroot, assembly, and final platform link remain NDK stages
+coefficient-root-dance-owned-c	x86_64	ick	c61e448251744a2f40ad743ebef1a027bdcd2f9d	qualified	Pinned shared ICK Android qualification followed by exact-head CMake application build; inherited Fortify2 and hardening retained
+coefficient-root-dance-ndk-glue-and-link	x86_64	ndk	c61e448251744a2f40ad743ebef1a027bdcd2f9d	gap:upstream-glue-assembler-and-platform-link	Unmodified NDK NativeActivity glue, sysroot, assembly, and final platform link remain NDK stages
+coefficient-root-dance-host-tests	x86_64-linux-gnu	ick	c61e448251744a2f40ad743ebef1a027bdcd2f9d	qualified	Native exact-source polynomial regression compiled and executed with pinned ICK
