@@ -32,3 +32,19 @@ target_link_libraries(coefficient_root_dance
     GLESv3
     m
 )
+
+option(COEFFICIENT_RENDERER_STATE_TEST "Build the real renderer's scalar upload regression" OFF)
+if(COEFFICIENT_RENDERER_STATE_TEST)
+  if(NOT ANDROID_ABI STREQUAL "x86_64")
+    message(FATAL_ERROR "The executable Bionic renderer regression requires an x86_64 host")
+  endif()
+  ick_android_objects(renderer_test_objects NAME renderer_state_test
+    SOURCES "${APPLICATION_ROOT}/tests/renderer_state_test.c" polynomial.c
+    INCLUDES "${NATIVE_GLUE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}"
+    OPTIONS -Wall -Wextra -Wpedantic -UNDEBUG -ffunction-sections -fdata-sections
+    STANDARD 11)
+  add_executable(renderer_state_test ${renderer_test_objects})
+  set_target_properties(renderer_state_test PROPERTIES LINKER_LANGUAGE C)
+  target_link_options(renderer_state_test PRIVATE -static -Wl,--gc-sections)
+  target_link_libraries(renderer_state_test m)
+endif()

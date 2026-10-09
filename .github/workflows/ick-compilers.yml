@@ -21,7 +21,7 @@ jobs:
       - name: Install the declared Android NDK
         run: sdkmanager "ndk;29.0.14206865"
       - name: Build and qualify the ICK frontend
-        uses: isomorphisms/ai-ci/ick-android@903b2cb27ea572c9c6cb2ffa9f39e0fbf06ec9f8
+        uses: isomorphisms/ai-ci/ick-android@66023d128a316cf9ab2c5146df60bb9fed82bb17
         with:
           abi: ${{ matrix.abi }}
           ndk: ${{ env.ANDROID_HOME }}/ndk/29.0.14206865
