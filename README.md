@@ -36,8 +36,30 @@ The debug APK is written to `app/build/outputs/apk/debug/app-debug.apk`.
 ## Math check
 
 ```sh
-cc -std=c11 -Wall -Wextra -Werror \
-  tests/polynomial_test.c app/src/main/cpp/polynomial.c -lm \
-  -o /tmp/polynomial_test
-/tmp/polynomial_test
+make -f icky/Makefile test ICK=/path/to/qualified/ick
 ```
+
+The maintained C arithmetic uses `÷` and is compiled directly by pinned ICK.
+The Android and unsigned-release workflows qualify the compiler for each
+maintained ABI, restore the stages under `build/ick/<abi>`, and check out the
+pinned shared source producer under `.ai-ci-ick`. Local Gradle builds require
+these same stages and checkout; no source rewrite or stock-C fallback is used.
+NDK r29 still assembles ICK output, compiles unchanged NativeActivity glue, and
+links the application. Existing Fortify2, stack protection and API26 are retained.
+Native-library proofs do not replace the existing APK, emulator or device checks.
+
+The selected compiler now includes ICK's complex-member extraction repair at
+`fbe86e23d55cfec2000c08e61deea2a407fd7175`, via shared action
+`66023d128a316cf9ab2c5146df60bb9fed82bb17`. The preceding compiler could expose
+its internal polar components to `crealf`/`cimagf` instead of Cartesian values.
+That defect moved the initial handles and prevented the existing emulator drag
+checks from reaching them; the expected touch coordinates remain unchanged.
+
+`make -f icky/Makefile renderer-state-test ANDROID_NDK=/path/to/ndk` builds and
+executes the actual renderer's reset, GL scalar uploads, screen coordinates and
+hit tests with the restored x86-64 stage in both Debug and Release. It includes
+`dance.c` itself and replaces only the GL transport with a capture, retaining
+assertions in both profiles. The preceding compiler fails this test and the
+repaired native frontend passes through actual r29/API26 static Bionic. The
+Android workflow runs the same regression before the unchanged emulator gate;
+new cross-compiler and emulator acceptance remain exact-head CI obligations.

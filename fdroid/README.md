@@ -5,7 +5,7 @@ This branch is stacked on `native-touch-prototype`, because that is where the An
 ## Upstream release contract
 
 1. Keep the Android `versionCode` and `versionName` source-controlled in `app/build.gradle.kts`.
-2. Run the `F-Droid release build` workflow. It builds `assembleRelease`, checks the package/version and three native ABIs, and retains the unsigned APK as evidence.
+2. Run the `F-Droid release build` workflow. It builds `assembleRelease`, checks the package/version and two maintained native ABIs, and retains the unsigned APK as evidence.
 3. Keep the repository license and F-Droid metadata aligned on `GPL-3.0-or-later`. `THIRD_PARTY.md` records reused and third-party material that is not silently relicensed by that grant.
 4. After the native app lands on the release branch, tag the exact release commit `v<versionName>`.
 5. Replace `FULL_COMMIT_HASH` in `org.isomorphisms.coefficientrootdance.yml.template` with the full hash of that tagged commit.
@@ -14,3 +14,10 @@ This branch is stacked on `native-touch-prototype`, because that is where the An
 F-Droid rebuilds the app from source and signs the resulting APK itself. The upstream unsigned APK exists to prove that the same public source can produce a release package without private credentials.
 
 After first inclusion, release tags can be picked up through `UpdateCheckMode: Tags` and `AutoUpdateMode: Version`.
+
+The template builds pinned ICK source stages for each maintained ABI and uses
+pinned ai-ci source-production rules before Gradle. Its `srclibs/ICK.yml` and
+`srclibs/AICI.yml` definitions belong alongside the submission metadata. The
+owned C files compile directly with ICK; upstream NDK glue, assembly and linking
+retain their existing platform tools. Fortify2 and the API26 floor remain active.
+This is submission/build configuration, not a claim of F-Droid publication.

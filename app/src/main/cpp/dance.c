@@ -445,14 +445,14 @@ static float complex screen_to_complex(
     float side_width = 0.5f * (float)engine->width;
     float side_start = right_side ? side_width : 0.0f;
     float local_x = x - side_start;
-    float aspect = side_width / (float)engine->height;
+    float aspect = side_width ÷ (float)engine->height;
 
     float real_part =
-        (2.0f * local_x / side_width - 1.0f) *
+        (2.0f * local_x ÷ side_width - 1.0f) *
         engine->half_height *
         aspect;
     float imaginary_part =
-        (1.0f - 2.0f * y / (float)engine->height) *
+        (1.0f - 2.0f * y ÷ (float)engine->height) *
         engine->half_height;
 
     return real_part + imaginary_part * I;
@@ -467,16 +467,16 @@ static void complex_to_screen(
 ) {
     float side_width = 0.5f * (float)engine->width;
     float side_start = right_side ? side_width : 0.0f;
-    float aspect = side_width / (float)engine->height;
+    float aspect = side_width ÷ (float)engine->height;
 
     *x =
         side_start +
         0.5f *
-        (crealf(value) / (engine->half_height * aspect) + 1.0f) *
+        (crealf(value) ÷ (engine->half_height * aspect) + 1.0f) *
         side_width;
     *y =
         0.5f *
-        (1.0f - cimagf(value) / engine->half_height) *
+        (1.0f - cimagf(value) ÷ engine->half_height) *
         (float)engine->height;
 }
 
