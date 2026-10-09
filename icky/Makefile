@@ -7,4 +7,4 @@ test: $(BUILD)/polynomial_test
 
 $(BUILD)/polynomial_test: tests/polynomial_test.c app/src/main/cpp/polynomial.c app/src/main/cpp/polynomial.h
 	mkdir -p "$(BUILD)"
-	$(ICK) -std=c11 -Wall -Wextra -Werror tests/polynomial_test.c app/src/main/cpp/polynomial.c -lm -o "$@"
+	$(ICK) -fno-link-libatomic -std=c11 -Wall -Wextra -Werror tests/polynomial_test.c app/src/main/cpp/polynomial.c -lm -o "$@"
