@@ -55,7 +55,7 @@ static void check_single_root_exchange_loop(void) {
             coefficient_path[step][0] = coefficient_path[0][0];
             coefficient_path[step][1] = coefficient_path[0][1];
         } else {
-            float theta = tau * (float)step / (float)LOOP_STEPS;
+            float theta = tau * (float)step ÷ (float)LOOP_STEPS;
             coefficient_path[step][0] =
                 -cosf(theta) - sinf(theta) * I;
             coefficient_path[step][1] = 0.0f + 0.0f * I;
