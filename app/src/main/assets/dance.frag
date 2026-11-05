@@ -117,19 +117,19 @@ void main() {
     bool right_side = point.x >= 0.5 * u_resolution.x;
     vec2 value = screen_to_complex(point);
 
-    vec3 left_background = vec3(0.965, 0.950, 0.925);
-    vec3 right_background = vec3(0.930, 0.950, 0.970);
+    vec3 left_background = vec3(33.0 / 255.0);
+    vec3 right_background = vec3(47.0 / 255.0);
     vec3 color = right_side ? right_background : left_background;
 
     float axis_x = line_mask(abs(value.x) * u_resolution.y / (2.0 * u_half_height), 0.7);
     float axis_y = line_mask(abs(value.y) * u_resolution.y / (2.0 * u_half_height), 0.7);
-    color = mix(color, vec3(0.67), max(axis_x, axis_y));
+    color = mix(color, vec3(69.0 / 255.0), max(axis_x, axis_y));
 
     float divider = line_mask(abs(point.x - 0.5 * u_resolution.x), 1.2);
-    color = mix(color, vec3(0.22), divider);
+    color = mix(color, vec3(69.0 / 255.0), divider);
 
-    vec3 coefficient_color = vec3(0.86, 0.34, 0.12);
-    vec3 root_color = vec3(0.08, 0.32, 0.72);
+    vec3 coefficient_color = vec3(232.0, 203.0, 139.0) / 255.0;
+    vec3 root_color = vec3(145.0, 183.0, 227.0) / 255.0;
 
     for (int index = 0; index < MAX_POLYNOMIAL_DEGREE; ++index) {
         if (index >= u_degree) {
@@ -144,10 +144,10 @@ void main() {
         if (u_active_kind == 1 && u_active_index == index) {
             selection_ring = ring_mask(point, center, 25.0, 2.5);
         }
-        color = mix(color, vec3(0.15), selection_ring);
+        color = mix(color, vec3(180.0 / 255.0), selection_ring);
 
         float digit = number_mask(index, point - center) * handle;
-        color = mix(color, vec3(1.0), digit);
+        color = mix(color, vec3(33.0 / 255.0), digit);
     }
 
     for (int index = 0; index < MAX_POLYNOMIAL_DEGREE; ++index) {
@@ -197,7 +197,7 @@ void main() {
         if (cluster_active) {
             float active_radius = 20.0 + 7.0 * float(multiplicity - 1);
             float selection_ring = ring_mask(point, center, active_radius, 2.5);
-            color = mix(color, vec3(0.15), selection_ring);
+            color = mix(color, vec3(180.0 / 255.0), selection_ring);
         }
     }
 
@@ -208,7 +208,7 @@ void main() {
 
     float minus_button = circle_mask(point, minus_center, 24.0);
     float plus_button = circle_mask(point, plus_center, 24.0);
-    color = mix(color, vec3(0.82), max(minus_button, plus_button));
+    color = mix(color, vec3(56.0 / 255.0), max(minus_button, plus_button));
 
     float minus_sign = segment_mask(
         point - minus_center,
@@ -229,10 +229,10 @@ void main() {
         1.6
     );
     float plus_sign = max(plus_horizontal, plus_vertical) * plus_button;
-    color = mix(color, vec3(0.15), max(minus_sign, plus_sign));
+    color = mix(color, vec3(244.0 / 255.0), max(minus_sign, plus_sign));
 
     float degree_digit = number_mask(u_degree, point - degree_center);
-    color = mix(color, vec3(0.15), degree_digit);
+    color = mix(color, vec3(244.0 / 255.0), degree_digit);
 
     out_color = vec4(color, 1.0);
 }
