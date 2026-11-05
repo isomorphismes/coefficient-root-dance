@@ -68,6 +68,66 @@ struct engine {
     bool dirty;
 };
 
+/* Android may relaunch the NativeActivity for configuration/asset changes.
+ * Preserve the bounded mathematical state, never EGL/input handles. */
+struct polynomial_snapshot {
+    uint32_t tag;
+    int32_t degree;
+    float half_height;
+    float complex coefficients[MAX_POLYNOMIAL_DEGREE];
+    float complex roots[MAX_POLYNOMIAL_DEGREE];
+};
+
+static struct polynomial_snapshot capture_polynomial(const struct engine *engine) {
+    struct polynomial_snapshot snapshot = {
+        .tag = UINT32_C(0x43524431),
+        .degree = engine->degree,
+        .half_height = engine->half_height
+    };
+    for (int index = 0; index < MAX_POLYNOMIAL_DEGREE; ++index) {
+        snapshot.coefficients[index] = engine->coefficients[index];
+        snapshot.roots[index] = engine->roots[index];
+    }
+    return snapshot;
+}
+
+static bool restore_polynomial(
+    struct engine *engine,
+    const void *saved_state,
+    size_t saved_size
+) {
+    if (saved_state == NULL || saved_size != sizeof(struct polynomial_snapshot)) {
+        return false;
+    }
+    const struct polynomial_snapshot *snapshot = saved_state;
+    if (snapshot->tag != UINT32_C(0x43524431) ||
+        snapshot->degree < MIN_POLYNOMIAL_DEGREE ||
+        snapshot->degree > MAX_POLYNOMIAL_DEGREE ||
+        !isfinite(snapshot->half_height) ||
+        snapshot->half_height <= 0.0f) {
+        return false;
+    }
+    for (int index = 0; index < MAX_POLYNOMIAL_DEGREE; ++index) {
+        float complex coefficient = snapshot->coefficients[index];
+        float complex root = snapshot->roots[index];
+        if (!isfinite(crealf(coefficient)) || !isfinite(cimagf(coefficient)) ||
+            !isfinite(crealf(root)) || !isfinite(cimagf(root))) {
+            return false;
+        }
+    }
+    engine->degree = snapshot->degree;
+    engine->half_height = snapshot->half_height;
+    for (int index = 0; index < MAX_POLYNOMIAL_DEGREE; ++index) {
+        engine->coefficients[index] = snapshot->coefficients[index];
+        engine->roots[index] = snapshot->roots[index];
+    }
+    /* A recreated window must not inherit an interrupted pointer gesture. */
+    engine->active_kind = SELECTION_NONE;
+    engine->active_index = -1;
+    engine->dirty = true;
+    return true;
+}
+
 static void reset_polynomial(struct engine *engine) {
     engine->half_height = 3.2f;
     engine->degree = 2;
@@ -687,6 +747,19 @@ static void handle_command(struct android_app *app, int32_t command) {
     struct engine *engine = app->userData;
 
     switch (command) {
+        case APP_CMD_SAVE_STATE: {
+            struct polynomial_snapshot *snapshot = malloc(sizeof(*snapshot));
+            if (snapshot != NULL) {
+                *snapshot = capture_polynomial(engine);
+                free(app->savedState);
+                app->savedState = snapshot;
+                app->savedStateSize = sizeof(*snapshot);
+                LOGI("polynomial state saved n=%d", engine->degree);
+            } else {
+                LOGE("could not save polynomial state");
+            }
+            break;
+        }
         case APP_CMD_INIT_WINDOW:
             if (app->window != NULL && engine->display == EGL_NO_DISPLAY) {
                 initialize_display(engine);
@@ -724,6 +797,9 @@ void android_main(struct android_app *app) {
     };
 
     reset_polynomial(&engine);
+    if (restore_polynomial(&engine, app->savedState, app->savedStateSize)) {
+        LOGI("polynomial state restored n=%d", engine.degree);
+    }
 
     app->userData = &engine;
     app->onAppCmd = handle_command;
