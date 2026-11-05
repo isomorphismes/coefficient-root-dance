@@ -1,0 +1,48 @@
+#!/usr/bin/env grease
+# A fresh emulator-only system-mode change must actually save/restore the model.
+set -eu -o pipefail
+test "$#" -eq 4
+var adb = ARGV[0]
+var serial = ARGV[1]
+var initial = ARGV[2]
+var output = ARGV[3]
+test "$serial" = emulator-5554
+test "$("$adb" -s "$serial" shell getprop ro.kernel.qemu | tr -d '\r')" = 1
+mkdir -p "$output"
+var package = org.isomorphisms.coefficientrootdance
+var pid = $("$adb" -s "$serial" shell pidof -s "$package" | tr -d '\r')
+printf '%s\n' "$pid" | rg -x '[1-9][0-9]*'
+var requested = ''
+if (initial === 'no') { setvar requested = yes } elif (initial === 'yes') { setvar requested = no } else { exit 2 }
+"$adb" -s "$serial" exec-out screencap -p > "$output/moved-before-relaunch.png"
+var marker = "forced-polynomial-relaunch-$initial"
+"$adb" -s "$serial" shell log -p i -t CharcoalReplay "$marker"
+"$adb" -s "$serial" shell cmd uimode night "$requested" > "$output/change-system-mode.txt"
+var stable = 0
+var ready = false
+for attempt in @(seq 1 60) {
+  "$adb" -s "$serial" logcat -d -v threadtime > "$output/relaunch.log"
+  "$adb" -s "$serial" shell dumpsys window > "$output/window.txt"
+  var current = $("$adb" -s "$serial" shell pidof -s "$package" | tr -d '\r')
+  try {
+    awk -v marker="$marker" -v pid="$pid" '
+      index($0, "CharcoalReplay: " marker) { epoch=1; next }
+      epoch && $3==pid && index($0, "CoefficientRootDance: polynomial state saved n=2") { saved=1 }
+      epoch && $3==pid && index($0, "CoefficientRootDance: polynomial state restored n=2") { restored=1 }
+      epoch && restored && $3==pid && index($0, "CoefficientRootDance: renderer ready:") { renderer=1 }
+      END { if(!epoch || !saved || !restored || !renderer) exit 1 }
+    ' "$output/relaunch.log"
+  }
+  var model_ready = _error.code === 0
+  try { rg -q 'mCurrentFocus=Window\{[^}]* org\.isomorphisms\.coefficientrootdance/android\.app\.NativeActivity\}' "$output/window.txt" }
+  var window_ready = _error.code === 0
+  if (model_ready and window_ready and current === pid) {
+    setvar stable = stable + 1
+    if (stable >= 3) { setvar ready = true; break }
+  } else { setvar stable = 0 }
+  sleep 0.5
+}
+if (not ready) { echo 'FAIL actual fresh-epoch NativeActivity model restoration and focused window' >&2; exit 1 }
+"$adb" -s "$serial" exec-out screencap -p > "$output/moved-after-relaunch.png"
+printf 'initial_system_mode\t%s\nrequested_system_mode\t%s\nfresh_native_saved_restored_renderer_focused_window\tPASS\n' "$initial" "$requested" > "$output/result.tsv"
+cat "$output/result.tsv"
