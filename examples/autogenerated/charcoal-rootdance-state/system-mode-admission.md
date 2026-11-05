@@ -1,0 +1,5 @@
+# Admit the actual emulator mode before claiming both schemes
+
+Independent readback42040670307 of API29 source001b9798 shows the controller requested yes but the public command reported Night mode:no, with no fresh save/restore events. The original focused window remained present. Android10 UiModeManagerService source (AOSP tagandroid-10.0.0_r47, blob30a356325adab1aa510cb39fe6b77f1dd01cfb66) explicitly ignores setNightMode before USER_SETUP_COMPLETE, while its shell command still prints the old getter value and exits successfully.
+
+The controller now verifies exact qemu/serial/SDK/user0 identity, completes setup only for that disposable emulator, and requires both the public mode getter and actual am-get-config night/notnight resource qualifier. Both initial mode and requested relaunch mode use this admission guard. This changes the test-device precondition, not the application's theme, solver, native state or gesture/pixel assertions. Setting exit status alone is never acceptance. The setup value before/after and actual service/configuration are retained. No physical phone or user profile is modified. Current matrix remains pending.
