@@ -1,0 +1,7 @@
+# Android29's locked public night-mode service
+
+The first setup-complete repair still records actual Night mode:no and a notnight resource configuration for a yes request. Android10 framework default config.xml sets config_lockDayNightMode=true (and defaultNightMode=1). Its UiModeManagerService requires MODIFY_DAY_NIGHT_MODE for a locked service; shell setter exit alone does not expose the rejection.
+
+For API29 only, after exact emulator serial/qemu/SDK/current-user guards, the controller uses the emulator's supported adb-root operation, waits for that exact device, and verifies qemu/SDK/UID0 again. The same public UiModeManager command must then admit the requested getter AND actual am-get-config night qualifier. Setup state and before/after dumpsys-uimode evidence are retained. No private binder, fake configuration, application privilege, APK, theme, model, coordinate or assertion change is introduced. The application still runs under its installed UID. This procedure rejects physical devices before any mutation and is never delivered as a C67 procedure. Current actual Android results remain pending.
+
+Primary sources: aosp-mirror/platform_frameworks_base tagandroid-10.0.0_r47, core/res/res/values/config.xml and services/core/java/com/android/server/UiModeManagerService.java. The former sets the lock; the latter checks caller permission before modifying the real configuration. This is a correction to emulator admission, not evidence that prior ignored yes requests passed.

@@ -13,6 +13,16 @@ test "$("$adb" -s "$serial" shell getprop ro.build.version.sdk | tr -d '\r')" = 
 test "$("$adb" -s "$serial" shell am get-current-user | tr -d '\r')" = 0
 if (mode !== 'no' and mode !== 'yes') { exit 2 }
 mkdir -p "$output"
+"$adb" -s "$serial" shell dumpsys uimode > "$output/uimode-before.txt"
+# Android29's default resource locks day/night changes to a privileged caller.
+# This applies only after the exact disposable-emulator identity guards above.
+if (api === '29') {
+  "$adb" -s "$serial" root > "$output/adbd-root.txt"
+  "$adb" -s "$serial" wait-for-device
+  test "$("$adb" -s "$serial" shell getprop ro.kernel.qemu | tr -d '\r')" = 1
+  test "$("$adb" -s "$serial" shell getprop ro.build.version.sdk | tr -d '\r')" = "$api"
+  test "$("$adb" -s "$serial" shell id -u | tr -d '\r')" = 0
+}
 "$adb" -s "$serial" shell settings --user 0 get secure user_setup_complete > "$output/setup-before.txt"
 # Android29 UiModeManager ignores changes until this disposable emulator is set up.
 "$adb" -s "$serial" shell settings --user 0 put secure user_setup_complete 1
@@ -32,8 +42,9 @@ for attempt in @(seq 1 40) {
   sleep 0.25
 }
 "$adb" -s "$serial" shell settings --user 0 get secure user_setup_complete > "$output/setup-after.txt"
+"$adb" -s "$serial" shell dumpsys uimode > "$output/uimode-after.txt"
 if (not admitted) {
-  cat "$output/night.txt" "$output/am-config.txt" >&2
+  cat "$output/setup-before.txt" "$output/setup-after.txt" "$output/uimode-after.txt" "$output/night.txt" "$output/am-config.txt" >&2
   echo 'FAIL actual emulator service and resource configuration did not admit requested night mode' >&2
   exit 1
 }
