@@ -1,5 +1,12 @@
 # Fixed charcoal presentation
 
+Run41978899639 passes host polynomial tests but the inherited66023 compiler
+provider fails ARM64/x86_64 NDK29 assembly on the Unicode .base64 probe. Promote
+the existing qualified f6d825d15cd3c0c34ae1b43240a463ff5d343090 provider and its
+metadata-bound archive/restore protocol. It retains ICK's repaired complex-member
+extraction; no root-matching, renderer-state assertion, NDK version or compiler
+fallback changes. Fresh actual renderer/Android acceptance remains required.
+
 The coefficient plane uses #212121 and the root plane #2F2F2F, with restrained
 #454545 axes and divider. Buttons use #383838 with #F4F4F4 signs and degree.
 Warm coefficient and cool root markers remain distinct; their tones are lighter

@@ -19,7 +19,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Qualify the native ICK compiler
         id: ick
-        uses: isomorphisms/ai-ci/ick-host@66023d128a316cf9ab2c5146df60bb9fed82bb17
+        uses: isomorphisms/ai-ci/ick-host@f6d825d15cd3c0c34ae1b43240a463ff5d343090
       - name: Check coefficient/root round trips
         run: make -f icky/Makefile test ICK="${{ steps.ick.outputs.compiler }}"
 
@@ -35,7 +35,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: isomorphisms/ai-ci
-          ref: 66023d128a316cf9ab2c5146df60bb9fed82bb17
+          ref: f6d825d15cd3c0c34ae1b43240a463ff5d343090
           path: .ai-ci-ick
 
       - name: Download qualified compiler stages
@@ -74,7 +74,7 @@ jobs:
         run: make -f icky/Makefile renderer-state-test ANDROID_NDK="$ANDROID_HOME/ndk/29.0.14206865" CMAKE="$ANDROID_HOME/cmake/3.22.1/bin/cmake" NINJA="$ANDROID_HOME/cmake/3.22.1/bin/ninja"
 
       - name: Verify declared source producers
-        uses: isomorphisms/ai-ci@66023d128a316cf9ab2c5146df60bb9fed82bb17
+        uses: isomorphisms/ai-ci@f6d825d15cd3c0c34ae1b43240a463ff5d343090
         with:
           suite: ci/build-toolchain-suite.tsv
           root: .
