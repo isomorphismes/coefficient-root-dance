@@ -1,0 +1,5 @@
+# Preserve the qualified image-consumer runtime
+
+Run42037250931 passes mathematical tests, both compiler jobs, APK build and both actual Debug/Release renderer-state tests. All six emulator cells stop before Android execution because ubuntu-latest now supplies Python3.14, for which pinned Pillow11.0.0 has no compatible wheel; pip attempted an unplanned source build and failed on missing JPEG inputs.
+
+The image-consuming emulator jobs now use ubuntu-24.04, the same Python3.12 host already qualified with the exact maintained Ithon/Pillow11 path in ai-ci readback42034190042. Binary-only installation fails closed instead of starting an undeclared image-library build. No application compiler, Android API, ABI, renderer, dependency version, gesture, pixel predicate or acceptance threshold changes. The pixel receipt uses plain TSV; the external image interface and fixed-source semantics remain unchanged. Current actual Android matrix results remain pending; no failed preparatory job is promoted to emulator evidence.

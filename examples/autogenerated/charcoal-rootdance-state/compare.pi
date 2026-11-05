@@ -1,7 +1,6 @@
 """Compare the actual moved model across a forced Android configuration relaunch."""
 from pathlib import Path
 from builtins import ValueError, bool, str, int, object, tuple
-import json
 from PIL import Image
 
 def as_text(value ∈ object) → str:
@@ -31,6 +30,6 @@ for image in [before, after]:
 before_view ∈ bytes ← before.crop((0, 0, 1200, 700)).tobytes()
 after_view ∈ bytes ← after.crop((0, 0, 1200, 700)).tobytes()
 require(before_view == after_view, "EXACT-MOVED-MODEL-AND-OWNED-UI-PIXELS-SURVIVE-RELAUNCH")
-report ∈ str ← json.dumps({"moved_model_precondition":"PASS", "actual_fresh_native_restore":"REQUIRED_BY_GREASE", "exact_owned_viewport_pixels":"PASS", "both_system_mode_backgrounds":"PASS", "original_drag_coordinates_and_guards":"UNCHANGED", "physical_C67":"NOT_RUN"}, sort_keys=True, indent=2)
-output.joinpath("pixel-receipt.json").write_text(report + "\n", encoding="utf-8")
+report ∈ str ← "moved_model_precondition\tPASS\nactual_fresh_native_restore\tREQUIRED_BY_GREASE\nexact_owned_viewport_pixels\tPASS\nboth_system_mode_backgrounds\tPASS\noriginal_drag_coordinates_and_guards\tUNCHANGED\nphysical_C67\tNOT_RUN\n"
+output.joinpath("pixel-receipt.tsv").write_text(report, encoding="utf-8")
 print(report)
