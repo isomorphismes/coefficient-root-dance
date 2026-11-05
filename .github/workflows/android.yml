@@ -135,7 +135,8 @@ jobs:
       - run: sudo apt-get update
       - run: sudo apt-get install --no-install-recommends -y ripgrep
       - run: python3 -m venv .image-runtime
-      - run: .image-runtime/bin/pip install --only-binary=:all: Pillow==11.0.0
+      - run: |
+          .image-runtime/bin/pip install --only-binary=:all: Pillow==11.0.0
 
       - name: Enable KVM permissions
         run: |
