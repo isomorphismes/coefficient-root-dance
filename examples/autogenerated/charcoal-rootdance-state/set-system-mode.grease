@@ -1,0 +1,52 @@
+#!/usr/bin/env grease
+# Verified fresh emulator, SDK and requested mode; do not trust setter exit alone.
+set -eu -o pipefail
+test "$#" -eq 5
+var adb = ARGV[0]
+var serial = ARGV[1]
+var api = ARGV[2]
+var mode = ARGV[3]
+var output = ARGV[4]
+test "$serial" = emulator-5554
+test "$("$adb" -s "$serial" shell getprop ro.kernel.qemu | tr -d '\r')" = 1
+test "$("$adb" -s "$serial" shell getprop ro.build.version.sdk | tr -d '\r')" = "$api"
+test "$("$adb" -s "$serial" shell am get-current-user | tr -d '\r')" = 0
+if (mode !== 'no' and mode !== 'yes') { exit 2 }
+mkdir -p "$output"
+"$adb" -s "$serial" shell dumpsys uimode > "$output/uimode-before.txt"
+# Android29's default resource locks day/night changes to a privileged caller.
+# This applies only after the exact disposable-emulator identity guards above.
+if (api === '29') {
+  "$adb" -s "$serial" root > "$output/adbd-root.txt"
+  "$adb" -s "$serial" wait-for-device
+  test "$("$adb" -s "$serial" shell getprop ro.kernel.qemu | tr -d '\r')" = 1
+  test "$("$adb" -s "$serial" shell getprop ro.build.version.sdk | tr -d '\r')" = "$api"
+  test "$("$adb" -s "$serial" shell id -u | tr -d '\r')" = 0
+}
+"$adb" -s "$serial" shell settings --user 0 get secure user_setup_complete > "$output/setup-before.txt"
+# Android29 UiModeManager ignores changes until this disposable emulator is set up.
+"$adb" -s "$serial" shell settings --user 0 put secure user_setup_complete 1
+var admitted = false
+for attempt in @(seq 1 40) {
+  "$adb" -s "$serial" shell cmd uimode night "$mode" > "$output/night.txt"
+  "$adb" -s "$serial" shell am get-config > "$output/am-config.txt"
+  try { rg -x -F "Night mode: $mode" "$output/night.txt" }
+  var service_ready = _error.code === 0
+  if (mode === 'yes') {
+    try { rg -q '^config:.*-night(-|$)' "$output/am-config.txt" }
+  } else {
+    try { rg -q '^config:.*-notnight(-|$)' "$output/am-config.txt" }
+  }
+  var configuration_ready = _error.code === 0
+  if (service_ready and configuration_ready) { setvar admitted = true; break }
+  sleep 0.25
+}
+"$adb" -s "$serial" shell settings --user 0 get secure user_setup_complete > "$output/setup-after.txt"
+"$adb" -s "$serial" shell dumpsys uimode > "$output/uimode-after.txt"
+if (not admitted) {
+  cat "$output/setup-before.txt" "$output/setup-after.txt" "$output/uimode-after.txt" "$output/night.txt" "$output/am-config.txt" >&2
+  echo 'FAIL actual emulator service and resource configuration did not admit requested night mode' >&2
+  exit 1
+}
+printf 'API\t%s\nrequested_system_mode\t%s\nactual_service_and_resource_configuration\tPASS\n' "$api" "$mode" > "$output/result.tsv"
+cat "$output/result.tsv"

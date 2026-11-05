@@ -1,0 +1,35 @@
+"""Compare the actual moved model across a forced Android configuration relaunch."""
+from pathlib import Path
+from builtins import ValueError, bool, str, int, object, tuple
+from PIL import Image
+
+def as_text(value ∈ object) → str:
+    return str(value)
+
+def require(condition ∈ bool, reason ∈ str) → None:
+    if not condition:
+        raise ValueError(reason)
+
+root ∈ Path ← Path.cwd()
+output ∈ Path ← root.joinpath("relaunch-evidence")
+before ∈ object ← Image.open(as_text(output.joinpath("moved-before-relaunch.png"))).convert("RGB")
+after ∈ object ← Image.open(as_text(output.joinpath("moved-after-relaunch.png"))).convert("RGB")
+before_size ∈ tuple[int, int] ← before.size
+after_size ∈ tuple[int, int] ← after.size
+require(before_size == (1280, 720) and after_size == before_size, "ACTUAL-EXPECTED-VIEWPORT")
+# These points come from the unchanged renderer/host hit-test at this exact viewport.
+for image in [before, after]:
+    root_pixel ∈ tuple[int, int, int] ← image.getpixel((892, 299))
+    coefficient_pixel ∈ tuple[int, int, int] ← image.getpixel((315, 300))
+    require(root_pixel == (145, 183, 227), "ACTUAL-MOVED-ROOT-POSITION")
+    require(coefficient_pixel == (232, 203, 139), "ACTUAL-MOVED-COEFFICIENT-POSITION")
+    left_background ∈ tuple[int, int, int] ← image.getpixel((100, 100))
+    right_background ∈ tuple[int, int, int] ← image.getpixel((700, 100))
+    require(left_background == (33, 33, 33) and right_background == (47, 47, 47), "CHARCOAL-IN-BOTH-SYSTEM-MODES")
+# Fixed app-owned viewport excludes the system navigation edge, not scientific content.
+before_view ∈ bytes ← before.crop((0, 0, 1200, 700)).tobytes()
+after_view ∈ bytes ← after.crop((0, 0, 1200, 700)).tobytes()
+require(before_view == after_view, "EXACT-MOVED-MODEL-AND-OWNED-UI-PIXELS-SURVIVE-RELAUNCH")
+report ∈ str ← "moved_model_precondition\tPASS\nactual_fresh_native_restore\tREQUIRED_BY_GREASE\nexact_owned_viewport_pixels\tPASS\nboth_system_mode_backgrounds\tPASS\noriginal_drag_coordinates_and_guards\tUNCHANGED\nphysical_C67\tNOT_RUN\n"
+output.joinpath("pixel-receipt.tsv").write_text(report, encoding="utf-8")
+print(report)

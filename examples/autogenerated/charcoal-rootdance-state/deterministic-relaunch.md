@@ -1,0 +1,9 @@
+# Deterministic Android relaunch qualification
+
+Source3e08e562 passes its complete unchanged API35 drag/multiplicity/degree sequence and both Debug/Release actual-renderer restoration tests in run42035278216. That does not prove the configuration relaunch occurred in that successful run.
+
+The expanded lane runs all original gestures and assertions on API29,34,35 from both initial system schemes. Between the original coefficient and root gestures it actually changes system night mode on a verified emulator. A fresh log marker must precede current-PID native save/restore/new-renderer events, and the actual focused application window must remain ready for three successive polls. No native gesture or mathematical state is injected. No root coordinate/assertion is changed and no copy of the product is uninstalled.
+
+The checked Ithon/Pillow observer verifies the actual moved root and coefficient pixels at the unchanged host-qualified viewport, charcoal21/2F on either side, and exact preceding/following app-owned pixels. The fixed crop0,0..1200,700 excludes only the system navigation edge of the1280x720 viewport; it contains the diagrams, handles, axes and degree controls. Initial or fabricated/reset scenes cannot satisfy the moved-pixel precondition. Actual source/native shader/runtime remain the mathematical/renderer owners. The existing Ithon decoder gap and foreign pixel/path tuples are explicit; no ordinary Python fallback is authored.
+
+The initial modes and changed modes are retained in the report. Full original logs and new relaunch screenshots/receipts are uploaded per independent API/mode cell. Results are pending; physical C67 remains NOT_RUN. Saving state cannot deliver an Android-dropped touch event, so restoration and current window readiness are separate required conditions.

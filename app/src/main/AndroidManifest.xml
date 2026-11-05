@@ -5,7 +5,7 @@
         android:allowBackup="false"
         android:hasCode="false"
         android:label="Coefficient Root Dance"
-        android:theme="@android:style/Theme.Material.NoActionBar.Fullscreen">
+        android:theme="@style/Theme.Charcoal.App">
         <activity
             android:name="android.app.NativeActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|density"

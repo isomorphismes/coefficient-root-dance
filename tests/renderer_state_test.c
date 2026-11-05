@@ -126,6 +126,47 @@ int main(void) {
     assert(nearest_handle(&engine, 320.0f, 383.0f, SELECTION_COEFFICIENT) == 1);
     assert(nearest_handle(&engine, 847.0f, 292.0f, SELECTION_ROOT) == 0);
     assert(nearest_handle(&engine, 1072.0f, 405.0f, SELECTION_ROOT) == 1);
+    /* Reproduce the real coefficient move before an Android relaunch. */
+    engine.active_kind = SELECTION_COEFFICIENT;
+    engine.active_index = 0;
+    move_active_handle(&engine, 300.0f, 300.0f);
+    assert(nearest_handle(&engine, 892.0f, 299.0f, SELECTION_ROOT) == 0);
+    struct polynomial_snapshot snapshot = capture_polynomial(&engine);
+    struct engine restored = {0};
+    reset_polynomial(&restored);
+    restored.width = engine.width;
+    restored.height = engine.height;
+    restored.active_kind = SELECTION_ROOT;
+    restored.active_index = 1;
+    restored.dirty = false;
+    assert(restore_polynomial(&restored, &snapshot, sizeof(snapshot)));
+    assert(restored.degree == engine.degree && restored.half_height == engine.half_height);
+    assert(restored.active_kind == SELECTION_NONE && restored.active_index == -1 && restored.dirty);
+    for (int index = 0; index < MAX_POLYNOMIAL_DEGREE; ++index) {
+        assert(crealf(restored.coefficients[index]) == crealf(engine.coefficients[index]));
+        assert(cimagf(restored.coefficients[index]) == cimagf(engine.coefficients[index]));
+        assert(crealf(restored.roots[index]) == crealf(engine.roots[index]));
+        assert(cimagf(restored.roots[index]) == cimagf(engine.roots[index]));
+    }
+    assert(nearest_handle(&restored, 892.0f, 299.0f, SELECTION_ROOT) == 0);
+    assert(!restore_polynomial(&restored, NULL, sizeof(snapshot)));
+    assert(!restore_polynomial(&restored, &snapshot, sizeof(snapshot) - 1u));
+    snapshot.tag = 0;
+    assert(!restore_polynomial(&restored, &snapshot, sizeof(snapshot)));
+    snapshot = capture_polynomial(&engine);
+    snapshot.degree = MAX_POLYNOMIAL_DEGREE + 1;
+    assert(!restore_polynomial(&restored, &snapshot, sizeof(snapshot)));
+    snapshot = capture_polynomial(&engine);
+    snapshot.half_height = 0.0f;
+    assert(!restore_polynomial(&restored, &snapshot, sizeof(snapshot)));
+    snapshot = capture_polynomial(&engine);
+    snapshot.coefficients[0] = NAN + 0.0f * I;
+    assert(!restore_polynomial(&restored, &snapshot, sizeof(snapshot)));
+    snapshot = capture_polynomial(&engine);
+    snapshot.roots[0] = NAN + 0.0f * I;
+    assert(!restore_polynomial(&restored, &snapshot, sizeof(snapshot)));
+    assert(nearest_handle(&restored, 892.0f, 299.0f, SELECTION_ROOT) == 0);
+    puts("bounded polynomial state survives relaunch and rejects malformed snapshots");
     puts("actual renderer Cartesian uploads and initial drag coordinates passed");
     return 0;
 }
