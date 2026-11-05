@@ -9,11 +9,11 @@ var output = ARGV[3]
 test "$serial" = emulator-5554
 test "$("$adb" -s "$serial" shell getprop ro.kernel.qemu | tr -d '\r')" = 1
 mkdir -p "$output"
-var package = org.isomorphisms.coefficientrootdance
+var package = "org.isomorphisms.coefficientrootdance"
 var pid = $("$adb" -s "$serial" shell pidof -s "$package" | tr -d '\r')
 printf '%s\n' "$pid" | rg -x '[1-9][0-9]*'
 var requested = ''
-if (initial === 'no') { setvar requested = yes } elif (initial === 'yes') { setvar requested = no } else { exit 2 }
+if (initial === 'no') { setvar requested = 'yes' } elif (initial === 'yes') { setvar requested = 'no' } else { exit 2 }
 "$adb" -s "$serial" exec-out screencap -p > "$output/moved-before-relaunch.png"
 var marker = "forced-polynomial-relaunch-$initial"
 "$adb" -s "$serial" shell log -p i -t CharcoalReplay "$marker"
